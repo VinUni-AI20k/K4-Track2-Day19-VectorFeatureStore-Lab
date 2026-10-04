@@ -218,6 +218,15 @@ print(historical)
 # **Think hard yourself:** **TTL choices** trong feature_views.py — tại sao
 # `user_profile_features` TTL=30 ngày nhưng `query_velocity_features` TTL=1 giờ?
 # Nếu sai TTL: query_velocity với TTL=30d sẽ trả giá trị cũ → fraud detection
-# bỏ lỡ tín hiệu real-time. **PIT join correctness** cũng là *think-hard* —
+# bỏ lỡ tín hiệu real-time.
+#
+# ⚠️ **Nhưng TTL chỉ được *thực thi khi đọc* trên một số online store.** Theo bảng
+# chức năng của Feast (docs.feast.dev → Online stores → Overview), "support for ttl
+# at retrieval" = **yes chỉ với Redis và ScyllaDB**; **SQLite (store của lab này) = no**.
+# Tức là ở đây, một giá trị ghi 50 giờ trước vẫn được trả về dù `ttl=1h`. Muốn chặn
+# feature cũ trên SQLite, phải tự kiểm tra tuổi feature lúc serve
+# (`get_online_features(...).to_dict(include_event_timestamps=True)` → cột `<feature>__ts`).
+#
+# **PIT join correctness** cũng là *think-hard* —
 # nếu data leakage xảy ra, training accuracy đẹp nhưng prod tệ 20-30% (deck §6).
 # Đừng để AI tự chọn TTL hay timestamp_field — bạn phải biết business semantics.
