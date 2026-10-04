@@ -31,13 +31,14 @@ from pathlib import Path
 
 warnings.filterwarnings("ignore")
 
-from fastembed import TextEmbedding
+from app.embeddings import Embedder
 from qdrant_client import QdrantClient
 
 from app.cache import SemanticCache
 
 DATA = Path(_setup.__file__).resolve().parent.parent / "data"
-embedder = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
+embedder = Embedder()  # EMBEDDING_BACKEND (default: fastembed / bge-small-en-v1.5, 384d)
+print(f"Embedding backend: {embedder.backend} -> {embedder.model_name} ({embedder.dim}d)")
 client = QdrantClient(":memory:")
 
 # %% [markdown]

@@ -54,10 +54,12 @@ make seed            Both: regenerate data/ files
 make api             Lite: FastAPI on :8000
 make lab             Lite: Jupyter Lab on :8888
 make benchmark       Both: Precision@10 + P99 latency table
-make test            Both: pytest (34 tests, ~2 s)
+make test            Both: pytest (42 tests, ~2 s)
 make gen-advanced    Both: regenerate NB6 compound queries + NB8 spend parquet
 make notebooks       Both: execute ALL notebooks headless (what the grader runs)
 make clean-lite      Lite: wipe venv + data + Feast registry
+                     (run this after upgrading feast — 0.66 changed the SQLite
+                     online-store schema; an old online_store.db breaks NB4)
 
 make setup-docker    Docker: full stack + venv + seed
 make verify-docker   Docker: verify Qdrant/Redis/Postgres reachable

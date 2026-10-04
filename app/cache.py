@@ -51,7 +51,7 @@ class CacheHit:
 class SemanticCache:
     client: QdrantClient
     embedder: object
-    dim: int = 384
+    dim: int | None = None       # None = take it from the embedder
     threshold: float = 0.75      # AWS ElastiCache benchmark used 0.75
     ttl_s: float | None = 3600.0
     namespaced: bool = True      # False = deliberately vulnerable, for NB7 step 3
@@ -60,6 +60,8 @@ class SemanticCache:
     _next_id: int = 0
 
     def __post_init__(self) -> None:
+        if self.dim is None:
+            self.dim = getattr(self.embedder, "dim", None) or len(self._embed("dim probe"))
         if CACHE_COLLECTION in {c.name for c in self.client.get_collections().collections}:
             self.client.delete_collection(CACHE_COLLECTION)
         self.client.create_collection(

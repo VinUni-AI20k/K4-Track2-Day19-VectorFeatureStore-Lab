@@ -65,3 +65,23 @@ def test_stats_track_hits_and_misses(embedder):
     c.get("acme", "cách nướng bánh mì")
     assert c.stats.hits == 1 and c.stats.misses == 1
     assert 0.0 < c.stats.hit_rate < 1.0
+
+
+class _FakeEmbedder:
+    """8-dim stand-in for a non-default EMBEDDING_BACKEND (no model download)."""
+
+    def embed(self, texts):
+        import numpy as np
+        for t in texts:
+            v = np.zeros(8, dtype=np.float32)
+            v[hash(t) % 8] = 1.0
+            yield v
+
+
+def test_cache_dim_follows_embedder_not_384():
+    # Regression: dim used to be hard-coded to 384, so any backend other than
+    # bge-small (multilingual / bge-m3 = 1024d) failed on the first put().
+    c = make(_FakeEmbedder(), threshold=0.5, ttl_s=None)
+    assert c.dim == 8
+    c.put("acme", "q", "A")
+    assert c.get("acme", "q").answer == "A"
